@@ -8,7 +8,7 @@
 
   <body>
     <div class="container">
-      <ul class="comments">
+      <ul class="comments" id="comments-list">
         <li class="comment">
           <div class="comment-header">
             <div>Глеб Фокин</div>
@@ -44,20 +44,23 @@
           </div>
         </li>
       </ul>
-      <div class="add-form">
+      <div class="add-form" id="form">
         <input
           type="text"
           class="add-form-name"
           placeholder="Введите ваше имя"
+          id="name-input"
         />
         <textarea
           type="textarea"
           class="add-form-text"
           placeholder="Введите ваш коментарий"
           rows="4"
+          id="textarea-input"
         ></textarea>
         <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+          <button class="add-form-button" id="add-button">Написать</button>
+          <button class="add-form-button" id="delete-button">Удалить</button>
         </div>
       </div>
     </div>
@@ -66,6 +69,142 @@
   <script>
     "use strict";
     // Код писать здесь
-    console.log("It works!");
+    // console.log("It works!");
+
+    const form = document.getElementById("form");
+    const nameInput = document.getElementById("name-input");
+    const textarea = document.getElementById("textarea-input");
+    const addButton = document.getElementById("add-button");
+    const delButton = document.getElementById("delete-button");
+    const list = document.getElementById("comments-list");
+    const item = document.getElementById("comment");
+
+    const addItem = () => {
+      const oldList = list.innerHTML;
+      const newDate = new Date();
+      let day = newDate.getDate();
+      let month = newDate.getMonth() + 1;
+      let year = newDate.getFullYear();
+      let hour = newDate.getHours();
+      let minutes = newDate.getMinutes();
+
+      nameInput.classList.remove("error");
+      textarea.classList.remove("error");
+
+      if (textarea.value === "" && nameInput.value === "") {
+        nameInput.classList.add("error");
+        textarea.classList.add("error");
+        return;
+      } else if (textarea.value === "") {
+        textarea.classList.add("error");
+        return;
+      } else if (nameInput.value === "") {
+        nameInput.classList.add("error");
+        return;
+      }
+
+      if (day < 10) {
+        day = "0" + day;
+      } else if (month < 10) {
+        month = "0" + month;
+      } else if (hour < 10) {
+        hour = "0" + hour;
+      } else if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+
+      list.innerHTML =
+        oldList +
+        `
+        <li class="comment">
+          <div class="comment-header">
+            <div>${nameInput.value}</div>
+            <div>${day}.${month}.${year} ${hour}:${minutes}</div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-text">
+              ${textarea.value}
+            </div>
+          </div>
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">0</span>
+              <button class="like-button"></button>
+            </div>
+          </div>
+        </li>
+      `;
+
+      nameInput.value = "";
+      textarea.value = "";
+
+      addButton.disabled = true;
+    };
+
+    const delLast = () => {
+      list.innerHTML = list.innerHTML.replace(
+        list.innerHTML.slice(
+          list.innerHTML.lastIndexOf(`<li class="comment">`)
+        ),
+        ""
+      );
+    };
+
+    form.addEventListener("keyup", (e) => {
+      if (e.code === "Enter") {
+        addItem();
+      }
+    });
+
+    addButton.disabled = true;
+
+    nameInput.addEventListener("input", (event) => {
+      textarea.addEventListener("input", (e) => {
+        if (event.target.value.length > 0 && e.target.value.length > 0) {
+          addButton.disabled = false;
+        } else if (
+          event.target.value.length > 0 &&
+          e.target.value.length === 0
+        ) {
+          addButton.disabled = true;
+        } else if (
+          event.target.value.length === 0 &&
+          e.target.value.length > 0
+        ) {
+          addButton.disabled = true;
+        } else if (
+          event.target.value.length === 0 &&
+          e.target.value.length === 0
+        ) {
+          addButton.disabled = true;
+        }
+      });
+    });
+
+    textarea.addEventListener("input", (event) => {
+      nameInput.addEventListener("input", (e) => {
+        if (event.target.value.length > 0 && e.target.value.length > 0) {
+          addButton.disabled = false;
+        } else if (
+          event.target.value.length > 0 &&
+          e.target.value.length === 0
+        ) {
+          addButton.disabled = true;
+        } else if (
+          event.target.value.length === 0 &&
+          e.target.value.length > 0
+        ) {
+          addButton.disabled = true;
+        } else if (
+          event.target.value.length === 0 &&
+          e.target.value.length === 0
+        ) {
+          addButton.disabled = true;
+        }
+      });
+    });
+
+    addButton.addEventListener("click", () => addItem());
+    delButton.addEventListener("click", () => delLast());
   </script>
 </html>
