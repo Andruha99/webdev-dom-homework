@@ -9,7 +9,7 @@
   <body>
     <div class="container">
       <ul class="comments" id="comments-list">
-        <li class="comment">
+        <!-- <li class="comment">
           <div class="comment-header">
             <div>Глеб Фокин</div>
             <div>12.02.22 12:18</div>
@@ -42,7 +42,7 @@
               <button class="like-button -active-like"></button>
             </div>
           </div>
-        </li>
+        </li> -->
       </ul>
       <div class="add-form" id="form">
         <input
@@ -76,11 +76,80 @@
     const textarea = document.getElementById("textarea-input");
     const addButton = document.getElementById("add-button");
     const delButton = document.getElementById("delete-button");
-    const list = document.getElementById("comments-list");
     const item = document.getElementById("comment");
 
+    const comments = [
+      {
+        author: "Глеб Фокин",
+        date: "12.02.22 12:18",
+        comment: "Это будет первый комментарий на этой странице",
+        likes: 3,
+        isLiked: false,
+      },
+      {
+        author: "Варвара Н.",
+        date: "13.02.22 19:22",
+        comment: "Мне нравится как оформлена эта страница! ❤",
+        likes: 75,
+        isLiked: false,
+      },
+    ];
+
+    const renderComments = () => {
+      const list = document.getElementById("comments-list");
+
+      const commentsHTML = comments
+        .map((comment, index) => {
+          if (comment.isLiked) {
+            return `
+            <li class="comment">
+              <div class="comment-header">
+                <div>${comment.author}</div>
+                <div>${comment.date}</div>
+              </div>
+              <div class="comment-body">
+                <div class="comment-text">
+                  ${comment.comment}
+                </div>
+              </div>
+              <div class="comment-footer">
+                <div class="likes">
+                  <span class="likes-counter">${comment.likes}</span>
+                  <button class="like-button -active-like" data-index="${index}"></button>
+                </div>
+              </div>
+            </li>
+            `;
+          } else {
+            return `
+            <li class="comment">
+              <div class="comment-header">
+                <div>${comment.author}</div>
+                <div>${comment.date}</div>
+              </div>
+              <div class="comment-body">
+                <div class="comment-text">
+                  ${comment.comment}
+                </div>
+              </div>
+              <div class="comment-footer">
+                <div class="likes">
+                  <span class="likes-counter">${comment.likes}</span>
+                  <button class="like-button" data-index="${index}"></button>
+                </div>
+              </div>
+            </li>
+            `;
+          }
+        })
+        .join("");
+
+      list.innerHTML = commentsHTML;
+
+      initLikesListeners();
+    };
+
     const addItem = () => {
-      const oldList = list.innerHTML;
       const newDate = new Date();
       let day = newDate.getDate();
       let month = newDate.getMonth() + 1;
@@ -113,41 +182,32 @@
         minutes = "0" + minutes;
       }
 
-      list.innerHTML =
-        oldList +
-        `
-        <li class="comment">
-          <div class="comment-header">
-            <div>${nameInput.value}</div>
-            <div>${day}.${month}.${year} ${hour}:${minutes}</div>
-          </div>
-          <div class="comment-body">
-            <div class="comment-text">
-              ${textarea.value}
-            </div>
-          </div>
-          <div class="comment-footer">
-            <div class="likes">
-              <span class="likes-counter">0</span>
-              <button class="like-button"></button>
-            </div>
-          </div>
-        </li>
-      `;
+      comments.push({
+        author: `${nameInput.value}`,
+        date: `${day}.${month}.${year} ${hour}:${minutes}`,
+        comment: `${textarea.value}`,
+        likes: 0,
+        isLiked: false,
+      });
 
       nameInput.value = "";
       textarea.value = "";
 
       addButton.disabled = true;
+      renderComments();
     };
 
     const delLast = () => {
+      const list = document.getElementById("comments-list");
+
       list.innerHTML = list.innerHTML.replace(
         list.innerHTML.slice(
           list.innerHTML.lastIndexOf(`<li class="comment">`)
         ),
         ""
       );
+
+      comments.pop();
     };
 
     form.addEventListener("keyup", (e) => {
@@ -204,7 +264,29 @@
       });
     });
 
+    const initLikesListeners = () => {
+      const likesBtns = document.querySelectorAll(".like-button");
+      const likes = document.querySelectorAll(".likes");
+
+      for (let likeBtn of likesBtns) {
+        likeBtn.addEventListener("click", () => {
+          const i = likeBtn.dataset.index;
+          if (!comments[i].isLiked) {
+            comments[i].isLiked = true;
+            comments[i].likes = comments[i].likes + 1;
+          } else {
+            comments[i].isLiked = false;
+            comments[i].likes = comments[i].likes - 1;
+          }
+
+          renderComments();
+        });
+      }
+    };
+
     addButton.addEventListener("click", () => addItem());
     delButton.addEventListener("click", () => delLast());
+
+    renderComments();
   </script>
 </html>
