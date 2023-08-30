@@ -202,13 +202,13 @@
       const list = document.getElementById("comments-list");
 
       list.innerHTML = list.innerHTML.replace(
-        list.innerHTML.slice(
-          list.innerHTML.lastIndexOf(`<li class="comment">`)
-        ),
+        list.innerHTML.slice(list.innerHTML.lastIndexOf(`<li >`)),
         ""
       );
 
       comments.pop();
+      initLikesListeners();
+      renderComments();
     };
 
     form.addEventListener("keyup", (e) => {
