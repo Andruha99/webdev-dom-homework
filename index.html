@@ -78,22 +78,70 @@
     const delButton = document.getElementById("delete-button");
     const item = document.getElementById("comment");
 
-    const comments = [
-      {
-        author: "Глеб Фокин",
-        date: "12.02.22 12:18",
-        comment: "Это будет первый комментарий на этой странице",
-        likes: 3,
-        isLiked: false,
-      },
-      {
-        author: "Варвара Н.",
-        date: "13.02.22 19:22",
-        comment: "Мне нравится как оформлена эта страница! ❤",
-        likes: 75,
-        isLiked: false,
-      },
+    let comments = [
+      // {
+      //   author: "Глеб Фокин",
+      //   date: "12.02.22 12:18",
+      //   comment: "Это будет первый комментарий на этой странице",
+      //   likes: 3,
+      //   isLiked: false,
+      // },
+      // {
+      //   author: "Варвара Н.",
+      //   date: "13.02.22 19:22",
+      //   comment: "Мне нравится как оформлена эта страница! ❤",
+      //   likes: 75,
+      //   isLiked: false,
+      // },
     ];
+
+    const fetchComments = fetch(
+      "https://wedev-api.sky.pro/api/v1/andrew-korovin/comments",
+      {
+        method: "GET",
+      }
+    );
+
+    fetchComments.then((response) => {
+      const jsonPromise = response.json();
+
+      jsonPromise.then((responseData) => {
+        console.log(responseData.comments);
+
+        comments = responseData.comments.map((comment) => {
+          const commentDate = new Date(comment.date);
+          let day = commentDate.getDate();
+          let month = commentDate.getMonth() + 1;
+          let year = commentDate.getFullYear();
+          let hour = commentDate.getHours();
+          let minutes = commentDate.getMinutes();
+
+          if (day < 10) {
+            day = "0" + day;
+          }
+          if (month < 10) {
+            month = "0" + month;
+          }
+          if (hour < 10) {
+            hour = "0" + hour;
+          }
+          if (minutes < 10) {
+            minutes = "0" + minutes;
+          }
+
+          const stringDate = `${day}.${month}.${year} ${hour}:${minutes}`;
+
+          return {
+            author: comment.author.name,
+            date: stringDate,
+            comment: comment.text,
+            likes: comment.likes,
+            isLiked: comment.isLiked,
+          };
+        });
+        renderComments();
+      });
+    });
 
     const renderComments = () => {
       const list = document.getElementById("comments-list");
@@ -167,13 +215,25 @@
 
       if (day < 10) {
         day = "0" + day;
-      } else if (month < 10) {
+      }
+      if (month < 10) {
         month = "0" + month;
-      } else if (hour < 10) {
+      }
+      if (hour < 10) {
         hour = "0" + hour;
-      } else if (minutes < 10) {
+      }
+      if (minutes < 10) {
         minutes = "0" + minutes;
       }
+
+      fetch("https://wedev-api.sky.pro/api/v1/andrew-korovin/comments", {
+        method: "POST",
+        body: JSON.stringify({ text: textarea.value, name: nameInput.value }),
+      }).then((response) => {
+        response.json().then((responseData) => {
+          console.log(responseData);
+        });
+      });
 
       comments.push({
         author: `${nameInput.value
