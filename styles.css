@@ -140,3 +140,8 @@ body {
 .error {
   border: 3px solid red;
 }
+
+.add-message {
+  margin-top: 50px;
+  color: white;
+}

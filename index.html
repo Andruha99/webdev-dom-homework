@@ -71,10 +71,11 @@
     // Код писать здесь
     // console.log("It works!");
 
+    const list = document.getElementById("comments-list");
     const form = document.getElementById("form");
     const nameInput = document.getElementById("name-input");
     const textarea = document.getElementById("textarea-input");
-    const addButton = document.getElementById("add-button");
+    let addButton = document.getElementById("add-button");
     const delButton = document.getElementById("delete-button");
     const item = document.getElementById("comment");
 
@@ -95,57 +96,94 @@
       // },
     ];
 
-    const fetchComments = fetch(
-      "https://wedev-api.sky.pro/api/v1/andrew-korovin/comments",
-      {
+    const fetchAndRenderComments = () => {
+      return fetch("https://wedev-api.sky.pro/api/v1/andrew-korovin/comments", {
         method: "GET",
-      }
-    );
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((response) => {
+          comments = response.comments.map((comment) => {
+            const commentDate = new Date(comment.date);
+            let day = commentDate.getDate();
+            let month = commentDate.getMonth() + 1;
+            let year = commentDate.getFullYear();
+            let hour = commentDate.getHours();
+            let minutes = commentDate.getMinutes();
 
-    fetchComments.then((response) => {
-      const jsonPromise = response.json();
+            if (day < 10) {
+              day = "0" + day;
+            }
+            if (month < 10) {
+              month = "0" + month;
+            }
+            if (hour < 10) {
+              hour = "0" + hour;
+            }
+            if (minutes < 10) {
+              minutes = "0" + minutes;
+            }
 
-      jsonPromise.then((responseData) => {
-        console.log(responseData.comments);
+            const stringDate = `${day}.${month}.${year} ${hour}:${minutes}`;
 
-        comments = responseData.comments.map((comment) => {
-          const commentDate = new Date(comment.date);
-          let day = commentDate.getDate();
-          let month = commentDate.getMonth() + 1;
-          let year = commentDate.getFullYear();
-          let hour = commentDate.getHours();
-          let minutes = commentDate.getMinutes();
-
-          if (day < 10) {
-            day = "0" + day;
-          }
-          if (month < 10) {
-            month = "0" + month;
-          }
-          if (hour < 10) {
-            hour = "0" + hour;
-          }
-          if (minutes < 10) {
-            minutes = "0" + minutes;
-          }
-
-          const stringDate = `${day}.${month}.${year} ${hour}:${minutes}`;
-
-          return {
-            author: comment.author.name,
-            date: stringDate,
-            comment: comment.text,
-            likes: comment.likes,
-            isLiked: comment.isLiked,
-          };
+            return {
+              author: comment.author.name,
+              date: stringDate,
+              comment: comment.text,
+              likes: comment.likes,
+              isLiked: comment.isLiked,
+            };
+          });
+          renderComments();
         });
-        renderComments();
-      });
-    });
+    };
+
+    // fetch("https://wedev-api.sky.pro/api/v1/andrew-korovin/comments", {
+    //   method: "GET",
+    // })
+    //   .then((response) => {
+    //     return response.json();
+    //   })
+    //   .then((response) => {
+    //     list.textContent =
+    //       "<div style='color:white'>Комментарии загружаются</div>";
+
+    //     comments = response.comments.map((comment) => {
+    //       const commentDate = new Date(comment.date);
+    //       let day = commentDate.getDate();
+    //       let month = commentDate.getMonth() + 1;
+    //       let year = commentDate.getFullYear();
+    //       let hour = commentDate.getHours();
+    //       let minutes = commentDate.getMinutes();
+
+    //       if (day < 10) {
+    //         day = "0" + day;
+    //       }
+    //       if (month < 10) {
+    //         month = "0" + month;
+    //       }
+    //       if (hour < 10) {
+    //         hour = "0" + hour;
+    //       }
+    //       if (minutes < 10) {
+    //         minutes = "0" + minutes;
+    //       }
+
+    //       const stringDate = `${day}.${month}.${year} ${hour}:${minutes}`;
+
+    //       return {
+    //         author: comment.author.name,
+    //         date: stringDate,
+    //         comment: comment.text,
+    //         likes: comment.likes,
+    //         isLiked: comment.isLiked,
+    //       };
+    //     });
+    //     renderComments();
+    //   });
 
     const renderComments = () => {
-      const list = document.getElementById("comments-list");
-
       const commentsHTML = comments
         .map((comment, index) => {
           return `
@@ -173,6 +211,7 @@
         .join("");
 
       list.innerHTML = commentsHTML;
+      addButton.disabled = true;
 
       const commentsElements = document.querySelectorAll(".comment");
 
@@ -226,30 +265,43 @@
         minutes = "0" + minutes;
       }
 
+      form.style.display = "none";
+      const addMessage = document.createElement("div");
+      addMessage.textContent =
+        "Погодите секундочку, комментарий загружается...";
+      addMessage.classList.add("add-message");
+      form.before(addMessage);
+
       fetch("https://wedev-api.sky.pro/api/v1/andrew-korovin/comments", {
         method: "POST",
         body: JSON.stringify({ text: textarea.value, name: nameInput.value }),
-      }).then((response) => {
-        response.json().then((responseData) => {
-          console.log(responseData);
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then(() => {
+          return fetchAndRenderComments();
+        })
+        .then((response) => {
+          form.style.display = "flex";
+          addMessage.remove();
         });
-      });
 
-      comments.push({
-        author: `${nameInput.value
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("&", "&amp;")}`,
-        date: `${day}.${month}.${year} ${hour}:${minutes}`,
-        comment: `${textarea.value
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("&", "&amp;")}`,
-        likes: 0,
-        isLiked: false,
-      });
+      // comments.push({
+      //   author: `${nameInput.value
+      //     .replaceAll("<", "&lt;")
+      //     .replaceAll(">", "&gt;")
+      //     .replaceAll('"', "&quot;")
+      //     .replaceAll("&", "&amp;")}`,
+      //   date: `${day}.${month}.${year} ${hour}:${minutes}`,
+      //   comment: `${textarea.value
+      //     .replaceAll("<", "&lt;")
+      //     .replaceAll(">", "&gt;")
+      //     .replaceAll('"', "&quot;")
+      //     .replaceAll("&", "&amp;")}`,
+      //   likes: 0,
+      //   isLiked: false,
+      // });
 
       nameInput.value = "";
       textarea.value = "";
@@ -346,9 +398,11 @@
       }
     };
 
+    fetchAndRenderComments();
+
     addButton.addEventListener("click", () => addItem());
     delButton.addEventListener("click", () => delLast());
 
-    renderComments();
+    list.innerHTML = "<li>Комментарии загружаются...</li>";
   </script>
 </html>
