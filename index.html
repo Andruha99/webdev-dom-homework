@@ -101,7 +101,11 @@
         method: "GET",
       })
         .then((response) => {
-          return response.json();
+          if (response.status === 500) {
+            throw new Error("Server's problem");
+          } else {
+            return response.json();
+          }
         })
         .then((response) => {
           comments = response.comments.map((comment) => {
@@ -136,6 +140,13 @@
             };
           });
           renderComments();
+        })
+        .catch((err) => {
+          if (err.message === "Server's problem") {
+            alert("Проблемы с сервером. Попробуйте снова");
+          } else {
+            alert("Какие-то проблемы с сетью. Попробуйте позже");
+          }
         });
     };
 
@@ -274,18 +285,44 @@
 
       fetch("https://wedev-api.sky.pro/api/v1/andrew-korovin/comments", {
         method: "POST",
-        body: JSON.stringify({ text: textarea.value, name: nameInput.value }),
+        body: JSON.stringify({
+          text: textarea.value,
+          name: nameInput.value,
+        }),
       })
         .then((response) => {
-          return response.json();
+          console.log(response);
+          if (textarea.value.length <= 3 || nameInput.value.length <= 3) {
+            throw new Error("Too little symbols");
+          } else if (response.status === 500) {
+            throw new Error("Server's problem");
+          } else {
+            return response.json();
+          }
         })
         .then(() => {
           return fetchAndRenderComments();
         })
         .then((response) => {
-          form.style.display = "flex";
-          addMessage.remove();
+          nameInput.value = "";
+          textarea.value = "";
+
+          addButton.disabled = true;
+        })
+        .catch((err) => {
+          if (err.message === "Too little symbols") {
+            alert("Введите более 3 символов");
+          } else if (err.message === "Server's problem") {
+            alert("Проблемы с сервером. Попробуйте снова");
+          } else {
+            alert("Какие-то проблемы с сетью. Попробуйте позже");
+          }
+
+          addButton.disabled = false;
         });
+
+      form.style.display = "flex";
+      addMessage.remove();
 
       // comments.push({
       //   author: `${nameInput.value
@@ -303,10 +340,6 @@
       //   isLiked: false,
       // });
 
-      nameInput.value = "";
-      textarea.value = "";
-
-      addButton.disabled = true;
       renderComments();
     };
 
