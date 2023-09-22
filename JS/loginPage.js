@@ -1,4 +1,5 @@
 import { login, setToken, token } from "./api.js";
+import { setUserName } from "./renderComments.js";
 
 export const renderLogin = ({ fetchAndRenderComments }) => {
   const appElement = document.getElementById("app");
@@ -12,16 +13,13 @@ export const renderLogin = ({ fetchAndRenderComments }) => {
           id="login-input"
         />
         <input
-          type="text"
+          type="password"
           class="add-form-name login-form-password"
           placeholder="Введите пароль"
           id="password-input"
         />
         <div class="add-form-row">
           <button class="enter-form-button" id="enter-button">Войти</button>
-          <a href="./index.html">
-            <p class="auth-text">Чтобы добавить комментарий, авторизируйтесь</p>
-          </a>
         </div>
       </div>
     </div>
@@ -42,6 +40,7 @@ export const renderLogin = ({ fetchAndRenderComments }) => {
         console.log(responseData);
         console.log(token);
         setToken(responseData.user.token);
+        setUserName(responseData.user.name);
         console.log(token);
       })
       .then(() => {

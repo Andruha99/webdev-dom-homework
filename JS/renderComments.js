@@ -1,4 +1,11 @@
-import { postComments } from "./api.js";
+import { postComments, token } from "./api.js";
+import { renderLogin } from "./loginPage.js";
+
+export let userName;
+
+export const setUserName = (newUserName) => {
+  userName = newUserName;
+};
 
 export const renderComments = ({ comments, fetchAndRenderComments }) => {
   const appElement = document.getElementById("app");
@@ -34,7 +41,7 @@ export const renderComments = ({ comments, fetchAndRenderComments }) => {
       <ul class="comments" id="comments-list">${commentsHTML}</ul>
       <div class="add-form" id="form">
         <input
-          value="Админ"
+          value=${userName}
           type="text"
           class="add-form-name"
           placeholder="Введите ваше имя"
@@ -53,9 +60,7 @@ export const renderComments = ({ comments, fetchAndRenderComments }) => {
           <button class="add-form-button" id="delete-button">Удалить</button>
         </div>
       </div>
-      <a href="./login.html"
-        ><p class="auth-text">Чтобы добавить комментарий, авторизируйтесь</p></a
-      >
+      <p class="auth-text">Чтобы добавить комментарий, <span id="log-in-button">авторизируйтесь</span></p>
     </div>
     `;
 
@@ -68,6 +73,19 @@ export const renderComments = ({ comments, fetchAndRenderComments }) => {
   let addButton = document.getElementById("add-button");
   const delButton = document.getElementById("delete-button");
   const item = document.getElementById("comment");
+  const logInBtn = document.getElementById("log-in-button");
+  const authText = document.querySelector(".auth-text");
+
+  if (token === undefined) {
+    form.style.display = "none";
+  } else {
+    authText.style.display = "none";
+    form.style.display = "flex";
+  }
+
+  logInBtn.addEventListener("click", () => {
+    renderLogin({ fetchAndRenderComments });
+  });
 
   // addButton.disabled = true;
 
@@ -134,18 +152,18 @@ export const renderComments = ({ comments, fetchAndRenderComments }) => {
         textarea.value = "";
 
         // addButton.disabled = true;
-      });
-    // .catch((err) => {
-    //   if (err.message === "Too little symbols") {
-    //     alert("Введите более 3 символов");
-    //   } else if (err.message === "Server's problem") {
-    //     alert("Проблемы с сервером. Попробуйте снова");
-    //   } else {
-    //     alert("Какие-то проблемы с сетью. Попробуйте позже");
-    //   }
+      })
+      .catch((err) => {
+        if (err.message === "Too little symbols") {
+          alert("Введите более 3 символов");
+        } else if (err.message === "Server's problem") {
+          alert("Проблемы с сервером. Попробуйте снова");
+        } else {
+          alert("Какие-то проблемы с сетью. Попробуйте позже");
+        }
 
-    //   addButton.disabled = false;
-    // });
+        addButton.disabled = false;
+      });
 
     form.style.display = "flex";
     addMessage.remove();

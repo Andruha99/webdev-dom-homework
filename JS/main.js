@@ -41,4 +41,4 @@ export const fetchAndRenderComments = () => {
   });
 };
 
-renderLogin({ fetchAndRenderComments });
+fetchAndRenderComments();
