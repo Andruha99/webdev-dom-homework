@@ -1,6 +1,6 @@
 import { postComments } from "./api.js";
 
-export const renderComments = ({ comments }) => {
+export const renderComments = ({ comments, fetchAndRenderComments }) => {
   const appElement = document.getElementById("app");
 
   const commentsHTML = comments
@@ -84,8 +84,6 @@ export const renderComments = ({ comments }) => {
     });
   }
 
-  initLikesListeners();
-
   const addItem = () => {
     const newDate = new Date();
     let day = newDate.getDate();
@@ -152,7 +150,7 @@ export const renderComments = ({ comments }) => {
     form.style.display = "flex";
     addMessage.remove();
 
-    renderComments({ comments });
+    renderComments({ comments, fetchAndRenderComments });
   };
 
   const delLast = () => {
@@ -165,7 +163,7 @@ export const renderComments = ({ comments }) => {
 
     comments.pop();
     initLikesListeners();
-    renderComments({ comments });
+    renderComments({ comments, fetchAndRenderComments });
   };
 
   form.addEventListener("keyup", (e) => {
@@ -226,15 +224,17 @@ export const renderComments = ({ comments }) => {
         }
 
         event.stopPropagation();
-        renderComments({ comments });
+        renderComments({ comments, fetchAndRenderComments });
       });
     }
   };
+
+  initLikesListeners();
 
   // fetchAndRenderComments();
 
   addButton.addEventListener("click", () => addItem());
   delButton.addEventListener("click", () => delLast());
 
-  list.innerHTML = "<li>Комментарии загружаются...</li>";
+  // list.innerHTML = "<li>Комментарии загружаются...</li>";
 };

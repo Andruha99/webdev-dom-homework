@@ -4,7 +4,7 @@ import { renderLogin } from "./loginPage.js";
 
 let comments = [];
 
-const fetchAndRenderComments = () => {
+export const fetchAndRenderComments = () => {
   getComments().then((response) => {
     comments = response.comments.map((comment) => {
       const commentDate = new Date(comment.date);
@@ -37,7 +37,7 @@ const fetchAndRenderComments = () => {
         isLiked: comment.isLiked,
       };
     });
-    renderComments({ comments });
+    renderComments({ comments, fetchAndRenderComments });
   });
 };
 

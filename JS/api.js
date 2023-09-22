@@ -28,7 +28,7 @@ export const postComments = ({ textarea }) => {
     }),
   }).then((response) => {
     console.log(response);
-    if (textarea.value.length <= 3 || nameInput.value.length <= 3) {
+    if (textarea.value.length <= 3) {
       throw new Error("Too little symbols");
     } else if (response.status === 500) {
       throw new Error("Server's problem");
