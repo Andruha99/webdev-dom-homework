@@ -1,12 +1,15 @@
 import { renderComments } from "./renderComments.js";
 import { getComments, postComments } from "./api.js";
 import { renderLogin } from "./loginPage.js";
+import { format } from "date-fns";
 
 let comments = [];
 
 export const fetchAndRenderComments = () => {
   getComments().then((response) => {
     comments = response.comments.map((comment) => {
+      const createDate = format(new Date(comment.date), "yyyy-MM-dd hh.mm.ss");
+
       const commentDate = new Date(comment.date);
       let day = commentDate.getDate();
       let month = commentDate.getMonth() + 1;
@@ -31,7 +34,7 @@ export const fetchAndRenderComments = () => {
 
       return {
         author: comment.author.name,
-        date: stringDate,
+        date: createDate,
         comment: comment.text,
         likes: comment.likes,
         isLiked: comment.isLiked,
